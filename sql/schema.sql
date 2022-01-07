@@ -1,0 +1,12 @@
+CREATE TABLE film (
+  id   BIGSERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  category_id SERIAL NOT NULL,
+  CONSTRAINT fk_category FOREIGN KEY(category_id) REFERENCES category(id)
+);
+
+CREATE TABLE CATEGORY (
+  id BIGSERIAL PRIMARY KEY,
+  category VARCHAR(255) NOT NULL
+);

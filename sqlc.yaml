@@ -1,0 +1,12 @@
+version: 1
+packages:
+  - path: "models"
+    name: "models"
+    engine: "postgresql"
+    schema: "sql/schema.sql"
+    queries: "sql/query.sql"
+    emit_json_tags: true
+    emit_exact_table_names: true
+    emit_result_struct_pointers: true
+    emit_params_struct_pointers: true
+    emit_prepared_queries: true

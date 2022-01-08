@@ -4,14 +4,14 @@ GET http://127.0.0.1:8080/api/film_category HTTP/1.1
 GET http://127.0.0.1:8080/api/film HTTP/1.1
 
 ###
-GET http://127.0.0.1:8080/api/film/2
+GET http://127.0.0.1:8080/api/film/22
 
 ###
 POST http://127.0.0.1:8080/api/film HTTP/1.1
 Content-Type: application/json
 
 {
-    "name": "Mamat",
+    "name": "Mamat123",
     "title": "Batman",
     "category_id": 8
 }
@@ -21,7 +21,7 @@ PUT http://127.0.0.1:8080/api/film HTTP/1.1
 Content-Type: application/json
 
 {
-    "id": 2,
+    "id": 22,
     "name": "Bobohp2",
     "title": "Shaolin",
     "category_id": 1
@@ -32,7 +32,7 @@ DELETE http://127.0.0.1:8080/api/film HTTP/1.1
 Content-Type: application/json
 
 {
-    "id": 4
+    "id": 22
 }
 
 ###
@@ -43,5 +43,5 @@ POST http://127.0.0.1:8080/api/category HTTP/1.1
 Content-Type: application/json
 
 {
-    "category": "Fantasy"
+    "category": "Thriller"
 }

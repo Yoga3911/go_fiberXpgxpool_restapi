@@ -1,9 +1,13 @@
 package config
 
-import "database/sql"
+import (
+	"context"
 
-func DBConnection() *sql.DB {
-	sql, err := sql.Open("postgres", "dbname=api user=yoga password=yyooggaa2020 port=5432 sslmode=disable")
+	"github.com/jackc/pgx/v4/pgxpool"
+)
+
+func DBConnection() *pgxpool.Pool {
+	sql, err := pgxpool.Connect(context.Background(), "postgres://yoga:yyooggaa2020@localhost:5432/api")
 	if err != nil {
 		panic(err.Error())
 	}

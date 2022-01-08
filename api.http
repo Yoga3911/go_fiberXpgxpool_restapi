@@ -1,14 +1,16 @@
 GET http://127.0.0.1:8080/film HTTP/1.1
 
 ###
+GET http://127.0.0.1:8080/film/7
 
+###
 POST http://127.0.0.1:8080/film HTTP/1.1
 Content-Type: application/json
 
 {
-    "name": "Anang",
-    "title": "Cat Woaman",
-    "category_id": 1
+    "name": "Mamat",
+    "title": "Super Man",
+    "category_id": 2
 }
 
 ###
@@ -17,17 +19,17 @@ Content-Type: application/json
 
 {
     "id": 1,
-    "name": "Parman2",
-    "title": "Aqua Man",
-    "category_id": 2
-}
+    "name": "Bobohp",
+    "title": "Shaolin",
+    "category_id": 3
+}Aqua Man
 
 ###
 DELETE http://127.0.0.1:8080/film HTTP/1.1
 Content-Type: application/json
 
 {
-    "id": 4
+    "id": 1
 }
 
 ###
@@ -38,5 +40,5 @@ POST http://127.0.0.1:8080/category HTTP/1.1
 Content-Type: application/json
 
 {
-    "category": "comedy"
+    "category": "romance"
 }

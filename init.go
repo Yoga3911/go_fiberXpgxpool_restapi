@@ -4,21 +4,35 @@ import (
 	"coba/config"
 	"coba/models"
 	"context"
-	"database/sql"
-
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
-	_ "github.com/lib/pq"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 var (
-	db *sql.DB = config.DBConnection()
-	q *models.Queries = models.New(db)
+	db *pgxpool.Pool = config.DBConnection()
 	ctx = context.Background()
 )
 
+func getFilm(c *fiber.Ctx) error {
+	id := c.Params("id")
+	result:= db.QueryRow(ctx, "SELECT * FROM film WHERE id = $1", id)
+	var film models.Film
+	result.Scan(&film.ID, &film.Name, &film.Title, &film.CategoryID)
+
+	return c.JSON(fiber.Map{
+		"message": "success",
+		"data": film,
+	})
+}
+
 func getAllFilm(c *fiber.Ctx) error {
-	film, _ := q.GetAllFilm(ctx)
+	films, _ := db.Query(ctx, "SELECT * FROM film ORDER BY id")
+	var film []*models.Film
+	for films.Next() {
+		var f models.Film
+		films.Scan(&f.ID, &f.Name, &f.Title, &f.CategoryID)
+		film = append(film, &f)
+	}
 	return c.JSON(fiber.Map{
 		"message": "succes",
 		"data": film,
@@ -28,7 +42,7 @@ func getAllFilm(c *fiber.Ctx) error {
 func addFilm(c *fiber.Ctx) error {
 	film := new(models.Film)
 	c.BodyParser(film)
-	q.CreateFilm(ctx, &models.CreateFilmParams{Name: film.Name,Title: film.Title, CategoryID: film.CategoryID})
+	db.QueryRow(ctx, "INSERT INTO film (name, title, category_id) VALUES ($1, $2, $3)", &film.Name, &film.Title, &film.CategoryID)
 
 	return c.JSON(fiber.Map{
 		"status": "success",
@@ -39,7 +53,7 @@ func addFilm(c *fiber.Ctx) error {
 func updateFilm(c *fiber.Ctx) error {
 	film := new(models.Film)
 	c.BodyParser(film)
-	q.UpdateFilm(ctx, &models.UpdateFilmParams{ID: film.ID, Name: film.Name, Title: film.Title, CategoryID: film.CategoryID})
+	db.QueryRow(ctx, "UPDATE film SET name = $2, title = $3, category_id = $4 WHERE id = $1", &film.ID, &film.Name, &film.Title, &film.CategoryID)
 	return c.JSON(fiber.Map{
 		"message": "success",
 		"data": film,
@@ -49,7 +63,7 @@ func updateFilm(c *fiber.Ctx) error {
 func deleteFilm(c *fiber.Ctx) error {
 	film := new(models.Film)
 	c.BodyParser(film)
-	q.DeleteFilm(ctx, int64(film.ID))
+	db.QueryRow(ctx, "DELETE FROM film WHERE id = $1", &film.ID)
 	return c.JSON(fiber.Map{
 		"message": "success",
 		"data": film.ID,
@@ -57,7 +71,13 @@ func deleteFilm(c *fiber.Ctx) error {
 }
 
 func getAllCategory(c *fiber.Ctx) error {
-	category, _ := q.GetAllCategory(ctx)
+	categorys, _ := db.Query(ctx, "SELECT * FROM category ORDER BY id")
+	var category []*models.Category
+	for categorys.Next() {
+		var ct models.Category
+		categorys.Scan(&ct.ID, &ct.Category)
+		category = append(category, &ct)
+	}
 	return c.JSON(fiber.Map{
 		"message": "success",
 		"data": category,
@@ -67,7 +87,7 @@ func getAllCategory(c *fiber.Ctx) error {
 func addCategory(c *fiber.Ctx) error {
 	category := new(models.Category)
 	c.BodyParser(category)
-	q.CreateCategory(ctx, category.Category)
+	db.QueryRow(ctx, "INSERT INTO category (category) VALUES ($1)", category.Category)
 	return c.JSON(fiber.Map{
 		"message": "success",
 		"data": category,
@@ -78,6 +98,7 @@ func main() {
 	defer db.Close()
 
 	app := fiber.New()
+	app.Get("/film/:id", getFilm)
 	app.Get("/film", getAllFilm)
 	app.Post("/film", addFilm)
 	app.Put("/film", updateFilm)

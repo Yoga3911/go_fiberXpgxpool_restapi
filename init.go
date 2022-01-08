@@ -7,21 +7,39 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-var	db *pgxpool.Pool = config.DBConnection()
+var db *pgxpool.Pool = config.DBConnection()
+
+const varFilmCategory = `SELECT film.id, film.name, film.title, category.category FROM film JOIN category ON (film.category_id=category.id) ORDER BY film.id`
+
+func getFilmCategory(c *fiber.Ctx) error {
+	films, _ := db.Query(c.Context(), varFilmCategory)
+	var film []*models.FilmCategory
+	for films.Next() {
+		var f models.FilmCategory
+		films.Scan(&f.ID, &f.Name, &f.Title, &f.Category)
+		film = append(film, &f)
+	}
+	return c.JSON(fiber.Map{
+		"message": "succes",
+		"data":    film,
+	})
+}
 
 const varFilm = `SELECT * FROM film WHERE id = $1`
+
 func getFilm(c *fiber.Ctx) error {
 	id := c.Params("id")
-	result:= db.QueryRow(c.Context(), varFilm, id)
+	result := db.QueryRow(c.Context(), varFilm, id)
 	var film models.Film
 	result.Scan(&film.ID, &film.Name, &film.Title, &film.CategoryID)
 	return c.JSON(fiber.Map{
 		"message": "success",
-		"data": film,
+		"data":    film,
 	})
 }
 
 const varAllFilm = `SELECT * FROM film ORDER BY id`
+
 func getAllFilm(c *fiber.Ctx) error {
 	films, _ := db.Query(c.Context(), varAllFilm)
 	var film []*models.Film
@@ -32,11 +50,12 @@ func getAllFilm(c *fiber.Ctx) error {
 	}
 	return c.JSON(fiber.Map{
 		"message": "succes",
-		"data": film,
+		"data":    film,
 	})
 }
 
 const varAddFilm = `INSERT INTO film (name, title, category_id) VALUES ($1, $2, $3)`
+
 func addFilm(c *fiber.Ctx) error {
 	film := new(models.Film)
 	c.BodyParser(film)
@@ -47,6 +66,7 @@ func addFilm(c *fiber.Ctx) error {
 }
 
 const varUpdateFilm = `UPDATE film SET name = $2, title = $3, category_id = $4 WHERE id = $1`
+
 func updateFilm(c *fiber.Ctx) error {
 	film := new(models.Film)
 	c.BodyParser(film)
@@ -57,6 +77,7 @@ func updateFilm(c *fiber.Ctx) error {
 }
 
 const varDeleteFilm = `DELETE FROM film WHERE id = $1`
+
 func deleteFilm(c *fiber.Ctx) error {
 	film := new(models.Film)
 	c.BodyParser(film)
@@ -67,6 +88,7 @@ func deleteFilm(c *fiber.Ctx) error {
 }
 
 const varAllCategory = `SELECT * FROM category ORDER BY id`
+
 func getAllCategory(c *fiber.Ctx) error {
 	categorys, _ := db.Query(c.Context(), varAllCategory)
 	var category []*models.Category
@@ -77,11 +99,12 @@ func getAllCategory(c *fiber.Ctx) error {
 	}
 	return c.JSON(fiber.Map{
 		"message": "success",
-		"data": category,
+		"data":    category,
 	})
 }
 
 const varAddCategory = `INSERT INTO category (category) VALUES ($1)`
+
 func addCategory(c *fiber.Ctx) error {
 	category := new(models.Category)
 	c.BodyParser(category)
@@ -102,9 +125,11 @@ func route(app *fiber.App) {
 	category := app.Group("/api/category")
 	category.Get("", getAllCategory)
 	category.Post("", addCategory)
+
+	app.Get("/api/film_category", getFilmCategory)
 }
 
-func main() {	
+func main() {
 	defer db.Close()
 	app := fiber.New()
 	route(app)
